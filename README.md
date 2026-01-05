@@ -6,8 +6,8 @@
 
 ## Mealy: Diet Meal Planner
 Microservice ini dikembangkan dalam rangka memenuhi UAS II3160 Teknologi Sistem Terintegrasi, lebih tepatnya Tugas 3 - Integrasi Layanan 
-Nama Pembuat Layanan Integrasi: Favian Rafi Laftiyanto / 18223036
-Nama Rekan Sekelompok yang Dimanfaatkan API-nya: Ahmad Evander Ruizhi Xavier / 18223064
+- Nama Pembuat Layanan Integrasi: Favian Rafi Laftiyanto / 18223036
+- Nama Rekan Sekelompok yang Dimanfaatkan API-nya: Ahmad Evander Ruizhi Xavier / 18223064
 
 ### A. Deskripsi
 Mealy adalah aplikasi Diet Meal Planner yang dirancang untuk membantu pengguna menentukan pilihan makanan sehat berdasarkan profil kesehatan personal. Aplikasi ini menghitung kebutuhan nutrisi harian (BMR, BMI, dan Calorie Needs) serta memberikan rekomendasi makanan yang telah difilter sesuai dengan batasan medis tertentu. Layanan dapat diakses pada: https://19623238-favian.github.io/mealy/ 
@@ -38,7 +38,7 @@ Layanan ini dikembangkan dengan memanfaatkan 2 buah API yang telah dibuat pada T
 3. **Pencocokan Data**: Algoritma aplikasi memfilter database makanan yang ada di API untuk mencari menu yang tidak melanggar batasan nutrisi pengguna.
 4. **Scoring**: Makanan diurutkan berdasarkan skor kesehatan untuk memberikan rekomendasi yang paling optimal.
 
-### Screenshot Website
+### E. Screenshot Website
 #### Main Page
 <img width="1600" height="765" alt="image" src="https://github.com/user-attachments/assets/049359dd-4ac0-4c21-99ad-f57e77e28a3e" />
 <img width="1600" height="767" alt="image" src="https://github.com/user-attachments/assets/791c468c-8012-4a32-a687-c5a422e0d927" />
