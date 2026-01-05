@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mealy - Healthy Meal Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/pw/AP1GczOX3Pwx2_q8_ADBLsU1pq5PWfnm1kdflKWC0tCzzSuBe0tDsSa-ybVNI58dTVY0pimVxmJDy935ZIQBKGWdbSYVw6HjPvDjLicY-Y62dX2odMx3CnM=s32-p-k">
+    <style>
+        :root {
+            --bg-color: #F8F5E9;
+            --secondary-green: #9DC08B;
+            --primary-green: #3A7D44;
+            --accent-orange: #DF6D14;
+        }
+        body { background-color: var(--bg-color); color: #333; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        input[type="radio"], input[type="checkbox"] {
+            accent-color: var(--accent-orange);
+            transform: scale(1.1);
+        }
+
+        .btn-primary { background-color: var(--primary-green); color: white; transition: 0.3s; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+        
+        /* CARD HOVER LIFTING EFFECT */
+        .card-top { 
+            border-top: 6px solid var(--accent-orange); 
+            background-color: white; 
+            border-radius: 12px; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-top:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .card-other { 
+            background-color: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            border: 1px solid #e2e8f0; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-other:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 20px -5px rgb(0 0 0 / 0.1);
+        }
+        
+        .summary-card { background-color: white; border-left: 5px solid var(--primary-green); }
+        
+        .nav-btn { padding: 10px 20px; font-weight: bold; border-radius: 8px; transition: 0.3s; }
+        .nav-btn.active { background-color: var(--primary-green); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-btn.inactive { background-color: #e2e8f0; color: #666; }
+
+        .sort-btn {
+            transition: all 0.2s;
+            border: 2px solid #fed7aa;
+        }
+        .sort-btn.active-sort {
+            background-color: var(--accent-orange) !important;
+            color: white !important;
+            border-color: var(--accent-orange) !important;
+            transform: scale(1.05);
+        }
+
+        /* FOOTER STYLE */
+        footer {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-orange); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col min-h-screen">
+
+    <div class="max-w-6xl mx-auto flex-grow w-full">
+        <header class="flex flex-col md:flex-row items-center justify-center mb-8 md:mb-12 gap-6">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczMnEMPTwivzr5Xs56QuyxBxi3BNExlK5RDn6U4gfoekXngwMc1Cse0dLVZZ6yrdvZh1wsh7FZiy3RsUD215H8-vvViHhL0zmzRruIW_sJMT3w3rCQQ=w2400" alt="Mealy Logo" class="w-24 h-24 md:w-32 md:h-32 rounded-full shadow-lg border-4 border-white object-cover">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl md:text-5xl font-black mb-2 tracking-tight" style="color: var(--primary-green);">Mealy: Healthy Meal Planner</h1>
+                <p class="text-gray-600 italic text-lg">Solusi Rekomendasi Makanan Cerdas Berdasarkan Nutrisi Personal Kamu</p>
+            </div>
+        </header>
+
+        <div class="flex justify-center space-x-4 mb-10">
+            <button id="btn-page-planner" onclick="switchPage('planner')" class="nav-btn active">
+                <i class="fas fa-calendar-alt mr-2"></i> Meal Planner
+            </button>
+            <button id="btn-page-search" onclick="switchPage('search')" class="nav-btn inactive">
+                <i class="fas fa-search mr-2"></i> Cari Nutrisi Makanan
+            </button>
+        </div>
+
+        <div id="page-planner">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <section class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h2 class="text-xl font-bold mb-6 flex items-center" style="color: var(--primary-green);">
+                        <i class="fas fa-user-md mr-2 text-2xl"></i> Form Data Kesehatan
+                    </h2>
+                    <form id="healthForm" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Umur</label>
+                                <input type="number" id="age" required min="1" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Jenis Kelamin</label>
+                                <div class="flex space-x-4 mt-2">
+                                    <label class="cursor-pointer"><input type="radio" name="gender" value="male" required class="mr-1"> Laki-laki</label>
+                                    <label class="cursor-pointer"><input type="radio" name="gender" value="female" class="mr-1"> Perempuan</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Berat (kg)</label>
+                                <input type="number" id="weight" required min="1" step="0.1" class="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Tinggi (cm)</label>
+                                <input type="number" id="height" required min="1" class="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Tingkat Aktivitas</label>
+                            <select id="activity" class="w-full p-2 border rounded-md outline-none bg-white">
+                                <option value="sedentary">Sedentary (Banyak Diam)</option>
+                                <option value="light">Light (Olahraga Ringan)</option>
+                                <option value="moderate">Moderate (Aktif)</option>
+                                <option value="active">Active (Sangat Aktif)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold mb-1">Riwayat Kondisi</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <label class="flex items-center cursor-pointer text-sm"><input type="checkbox" id="diabetes" class="mr-2"> Diabetes</label>
+                                <label class="flex items-center cursor-pointer text-sm"><input type="checkbox" id="hypertension" class="mr-2"> Hipertensi</label>
+                                <label class="flex items-center cursor-pointer text-sm"><input type="checkbox" id="heart_disease" class="mr-2"> Jantung</label>
+                            </div>
+                        </div>
+                        <button type="submit" id="submitBtn" class="w-full p-4 rounded-lg font-bold btn-primary mt-4 uppercase tracking-wider text-lg shadow-md">
+                            Cek Rekomendasi <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </form>
+                </section>
+
+                <section id="nutritionSummary" class="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-center border-2 border-dashed border-gray-300 relative">
+                    <div id="summaryPlaceholder" class="text-center text-gray-400">
+                        <i class="fas fa-heartbeat text-6xl mb-4 text-gray-200"></i>
+                        <p class="font-medium">Data kalkulasi nutrisi harian akan tampil di panel ini.</p>
+                    </div>
+                    <div id="summaryContent" class="hidden space-y-6">
+                        <h2 class="text-2xl font-bold text-green-700 italic border-b-2 border-green-100 pb-2">Analisis Nutrisi Harian</h2>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="p-4 bg-green-50 rounded-lg text-center shadow-sm">
+                                <p class="text-xs text-green-600 font-black uppercase mb-1">BMI</p>
+                                <p id="res-bmi" class="text-2xl font-black text-gray-800">-</p>
+                            </div>
+                            <div class="p-4 bg-orange-50 rounded-lg text-center shadow-sm">
+                                <p class="text-xs text-orange-600 font-black uppercase mb-1">BMR</p>
+                                <p id="res-bmr" class="text-xl font-black text-gray-800">-</p>
+                            </div>
+                            <div class="p-4 bg-orange-50 rounded-lg text-center shadow-sm">
+                                <p class="text-xs text-orange-600 font-black uppercase mb-1">Kebutuhan</p>
+                                <p id="res-daily" class="text-xl font-black text-gray-800">-</p>
+                            </div>
+                        </div>
+                        <div class="p-5 summary-card shadow-sm rounded-r-lg">
+                            <h4 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">
+                                <i class="fas fa-shield-alt text-green-600 mr-2"></i> Batasan Nutrisi Per Porsi
+                            </h4>
+                            <ul id="res-constraints" class="text-base space-y-2 text-gray-700 font-medium grid grid-cols-1 md:grid-cols-2">
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section id="loading" class="hidden flex flex-col items-center justify-center space-y-4 py-20">
+                <div class="loader"></div>
+                <p class="font-bold text-gray-600 animate-pulse text-lg">Menyusun menu terbaik untuk kesehatan Anda...</p>
+            </section>
+
+            <div id="resultArea" class="hidden space-y-12 mb-20">
+                <div>
+                    <h2 class="text-3xl font-black mb-8 flex items-center justify-center tracking-tight" style="color: var(--accent-orange);">
+                         <i class="fas fa-star mr-3 text-yellow-400"></i> TOP 5 MAKANAN TERBAIK
+                    </h2>
+                    <div id="top5Cards" class="grid grid-cols-1 gap-6"></div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 flex items-center border-b-4 border-green-200 inline-block pb-1" style="color: var(--primary-green);">
+                        Pilihan Sehat Lainnya
+                    </h3>
+                    <div id="otherCards" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                </div>
+            </div>
+
+            <div id="placeholderMain" class="bg-white p-16 rounded-2xl text-center border-4 border-dotted border-gray-200 mb-20">
+                <i class="fas fa-utensils text-7xl mb-6 text-gray-100"></i>
+                <p class="text-gray-400 text-xl font-semibold">Tentukan data Anda untuk memulai perencanaan makan sehat.</p>
+            </div>
+        </div>
+
+        <div id="page-search" class="hidden space-y-6 mb-20">
+            <section class="bg-white p-6 rounded-xl shadow-md border-b-4 border-orange-500">
+                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                    <i class="fas fa-search mr-2 text-orange-500"></i> Cari Informasi Nutrisi Makanan
+                </h3>
+                <div class="flex flex-col md:flex-row gap-2">
+                    <input type="text" id="searchInput" placeholder="Contoh: Milk, Yogurt, Meat..." class="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-gray-300">
+                    <button id="searchBtn" class="bg-orange-500 text-white px-8 py-2 rounded-lg font-bold hover:bg-orange-600 transition shadow-md">
+                        Cari <i class="fas fa-search ml-1"></i>
+                    </button>
+                </div>
+                
+                <div id="sortControls" class="hidden mt-8 border-t pt-6">
+                    <p class="text-lg font-black text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-sort-amount-down mr-2 text-primary-green"></i> Urutkan Kandungan Tertinggi:
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="sortSearchData('calories_kcal', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🔥 Kalori</button>
+                        <button onclick="sortSearchData('protein_g', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🥩 Protein</button>
+                        <button onclick="sortSearchData('carbohydrates_g', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🍞 Karbo</button>
+                        <button onclick="sortSearchData('fat_g', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🥑 Lemak</button>
+                        <button onclick="sortSearchData('sodium_mg', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🧂 Natrium</button>
+                        <button onclick="sortSearchData('sugars_g', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🍬 Gula</button>
+                        <button onclick="sortSearchData('fibers_g', this)" class="sort-btn text-sm md:text-base bg-orange-50 px-4 py-2 rounded-xl font-bold">🌿 Serat</button>
+                    </div>
+                </div>
+
+                <div id="searchResultArea" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="w-full text-center py-10 text-gray-500 text-xs border-t border-gray-200 mt-10">
+        Made by <br>
+        <span class="font-bold">Favian Rafi Laftiyanto / 18223036</span>
+    </footer>
+
+    <script>
+        const healthForm = document.getElementById('healthForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const resultArea = document.getElementById('resultArea');
+        const placeholderMain = document.getElementById('placeholderMain');
+        const summaryPlaceholder = document.getElementById('summaryPlaceholder');
+        const summaryContent = document.getElementById('summaryContent');
+
+        const LOGIN_API     = 'https://evanrzh.theokaitou.my.id/api/login';
+        const NUTRITION_API = 'https://evanrzh.theokaitou.my.id/api/nutrition/constraints';
+        const GROCERY_API   = 'https://api.cirro.my.id/api/recommendation/food';
+        
+        let foods_counter = 0;
+        let currentSearchData = [];
+
+        function switchPage(page) {
+            const planner = document.getElementById('page-planner');
+            const search = document.getElementById('page-search');
+            const btnPlanner = document.getElementById('btn-page-planner');
+            const btnSearch = document.getElementById('btn-page-search');
+
+            if (page === 'planner') {
+                planner.classList.remove('hidden');
+                search.classList.add('hidden');
+                btnPlanner.className = "nav-btn active";
+                btnSearch.className = "nav-btn inactive";
+            } else {
+                planner.classList.add('hidden');
+                search.classList.remove('hidden');
+                btnPlanner.className = "nav-btn inactive";
+                btnSearch.className = "nav-btn active";
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResultArea = document.getElementById('searchResultArea');
+        const sortControls = document.getElementById('sortControls');
+
+        searchBtn.addEventListener('click', async () => {
+            const query = searchInput.value.trim().toLowerCase();
+            if (!query) return alert("Masukkan nama makanan!");
+
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+            searchResultArea.innerHTML = "";
+
+            try {
+                const res = await fetch(GROCERY_API, {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer HEALTHY-FOOD-2025' }
+                });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    currentSearchData = result.data.filter(f => f.food.toLowerCase().includes(query));
+                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active-sort'));
+                    
+                    if (currentSearchData.length === 0) {
+                        sortControls.classList.add('hidden');
+                        searchResultArea.innerHTML = `<p class="text-gray-500 italic col-span-2 text-center py-10">Makanan tidak ditemukan.</p>`;
+                    } else {
+                        sortControls.classList.remove('hidden');
+                        renderSearchResults();
+                    }
+                }
+            } catch (e) {
+                alert("Gagal mencari makanan: " + e.message);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = `Cari <i class="fas fa-search ml-1"></i>`;
+            }
+        });
+
+        function sortSearchData(prop, element) {
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active-sort'));
+            element.classList.add('active-sort');
+            
+            currentSearchData.sort((a, b) => b[prop] - a[prop]);
+            renderSearchResults();
+        }
+
+        function renderSearchResults() {
+            searchResultArea.innerHTML = "";
+            currentSearchData.forEach(food => {
+                const card = createCard(food, false, true); 
+                searchResultArea.appendChild(card);
+            });
+        }
+
+        healthForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const age = parseInt(document.getElementById('age').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+
+            if (age <= 0 || weight <= 0 || height <= 0) {
+                alert("Umur, Berat, dan Tinggi badan tidak boleh bernilai negatif atau nol!");
+                return;
+            }
+
+            foods_counter = 0; 
+            placeholderMain.classList.add('hidden');
+            resultArea.classList.add('hidden');
+            loading.classList.remove('hidden');
+            submitBtn.disabled = true;
+
+            const formData = {
+                age, weight, height,
+                gender: document.querySelector('input[name="gender"]:checked').value,
+                activity_level: document.getElementById('activity').value,
+                conditions: {
+                    diabetes: document.getElementById('diabetes').checked,
+                    hypertension: document.getElementById('hypertension').checked,
+                    heart_disease: document.getElementById('heart_disease').checked
+                }
+            };
+
+            try {
+                const loginRes = await fetch(LOGIN_API, { method: 'POST' });
+                const loginData = await loginRes.json();
+                const jwtToken = loginData.token;
+
+                const nutritionRes = await fetch(NUTRITION_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+                    body: JSON.stringify(formData)
+                });
+                const nutritionData = await nutritionRes.json();
+                displaySummary(nutritionData);
+
+                const groceryRes = await fetch(GROCERY_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer HEALTHY-FOOD-2025' },
+                    body: JSON.stringify(nutritionData) 
+                });
+                const groceryData = await groceryRes.json();
+
+                if (groceryData.status === 'success') {
+                    renderResults(groceryData.data);
+                }
+            } catch (error) {
+                alert("Koneksi Error: " + error.message);
+            } finally {
+                loading.classList.add('hidden');
+                resultArea.classList.remove('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+
+        function displaySummary(data) {
+            summaryPlaceholder.classList.add('hidden');
+            summaryContent.classList.remove('hidden');
+            document.getElementById('res-bmi').innerText = data.meta.bmi.toFixed(1);
+            document.getElementById('res-bmr').innerText = Math.round(data.meta.bmr) + " kcal";
+            document.getElementById('res-daily').innerText = Math.round(data.meta.daily_calorie_needs) + " kcal";
+
+            const consList = document.getElementById('res-constraints');
+            const c = data.constraints;
+            consList.innerHTML = `
+                <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Maksimal Kalori: ${c.max_calories_per_serving}</li>
+                <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Minimal Protein: ${c.macros.protein.min_g}g</li>
+                <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Maks Karbohidrat: ${c.macros.carbohydrates.max_g}g</li>
+                <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Maksimal Lemak: ${c.macros.fat.max_g}g</li>
+                <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Maksimal Gula: ${c.micros.sugars_g_max}g</li>
+                <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Minimal Serat: ${c.micros.dietary_fiber_g_min}g</li>
+            `;
+        }
+
+        function renderResults(foods) {
+            const top5Container = document.getElementById('top5Cards');
+            const othersContainer = document.getElementById('otherCards');
+            top5Container.innerHTML = ''; othersContainer.innerHTML = '';
+
+            foods.forEach((food, index) => {
+                const card = createCard(food, index < 5, false);
+                if (index < 5) top5Container.appendChild(card);
+                else othersContainer.appendChild(card);
+            });
+        }
+
+        function createCard(data, isLarge, hideScore = false) {
+            const div = document.createElement('div');
+            const scoreElement = hideScore ? '' : `<span class="p-1 px-3 rounded text-center ${isLarge ? 'text-green-700 bg-green-50 border border-green-200' : 'text-green-800 bg-green-50 border border-green-100'}">Skor: ${parseFloat(data.health_score).toFixed(2)}</span>`;
+
+            const nutrientList = `
+                <div class="grid ${isLarge ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2'} gap-4 mt-4 font-semibold ${isLarge ? 'text-gray-700 text-sm md:text-base' : 'text-gray-600 text-xs md:text-sm'}">
+                    <span class="flex items-center"><i class="fas fa-fire mr-2 text-orange-500"></i> ${data.calories_kcal} Kalori</span>
+                    <span class="flex items-center"><i class="fas fa-egg mr-2 text-yellow-600"></i> ${data.protein_g}g Protein</span>
+                    <span class="flex items-center"><i class="fas fa-bread-slice mr-2 text-amber-700"></i> ${data.carbohydrates_g}g Karbohidrat</span>
+                    <span class="flex items-center"><i class="fas fa-tint mr-2 text-blue-400"></i> ${data.fat_g}g Lemak</span>
+                    <span class="flex items-center"><i class="fas fa-vial mr-2"></i> ${data.sodium_mg}mg Natrium</span>
+                    <span class="flex items-center"><i class="fas fa-candy-cane mr-2"></i> ${data.sugars_g}g Gula</span>
+                    <span class="flex items-center"><i class="fas fa-seedling mr-2"></i> ${data.fibers_g}g Serat</span>
+                    ${scoreElement}
+                </div>
+            `;
+
+            if (isLarge) {
+                div.className = "card-top p-6 flex flex-col md:flex-row justify-between items-center bg-white border border-gray-100";
+                div.innerHTML = `
+                    <div class="flex-1 w-full">
+                        <h4 class="font-black uppercase tracking-wide text-2xl text-green-900">${data.food}</h4>
+                        ${nutrientList}
+                    </div>
+                    <div class="mt-4 md:mt-0 md:ml-8 bg-orange-600 text-white font-black px-8 py-4 rounded-2xl shadow-lg whitespace-nowrap text-2xl italic">#${++foods_counter}</div>
+                `;
+            } else {
+                div.className = "card-other flex flex-col justify-between";
+                div.innerHTML = `
+                    <div class="bg-[#3A7D44] p-4">
+                        <h4 class="font-black uppercase tracking-wide text-white text-lg">${data.food}</h4>
+                    </div>
+                    <div class="bg-white p-4">
+                        ${nutrientList}
+                    </div>
+                `;
+            }
+            return div;
+        }
+    </script>
+</body>
+</html>
