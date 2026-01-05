@@ -13,9 +13,9 @@ Nama Rekan Sekelompok yang Dimanfaatkan API-nya: Ahmad Evander Ruizhi Xavier / 1
 Mealy adalah aplikasi Diet Meal Planner yang dirancang untuk membantu pengguna menentukan pilihan makanan sehat berdasarkan profil kesehatan personal. Aplikasi ini menghitung kebutuhan nutrisi harian (BMR, BMI, dan Calorie Needs) serta memberikan rekomendasi makanan yang telah difilter sesuai dengan batasan medis tertentu. Layanan dapat diakses pada: https://19623238-favian.github.io/mealy/ 
 
 Layanan ini dikembangkan dengan memanfaatkan 2 buah API yang telah dibuat pada Tugas sebelumnya (Tugas 2). Berikut adalah API yang dimanfaatkan pada layanan ini:
-- [API Healthy Grocery]https://github.com/19623238-Favian/API-Healthy-Grocery : https://api.cirro.my.id/api/recommendation/food
+- [API Healthy Grocery](https://github.com/19623238-Favian/API-Healthy-Grocery) : https://api.cirro.my.id/api/recommendation/food
   - Digunakan untuk menentukan BMI, BMR, dan kebutuhan nutrisi pengguna
-- [API Nutrient]https://github.com/evanderruizhi2/nutrition-serviceAPI.git : https://evanrzh.theokaitou.my.id/api/nutrition/constraints
+- [API Nutrient](https://github.com/evanderruizhi2/nutrition-serviceAPI.git) : https://evanrzh.theokaitou.my.id/api/nutrition/constraints
   - Digunakan untuk menentukan rekomendasi makanan sehat bagi pengguna dan juga untuk mencari kandungan nutrisi suatu makanan
 
 ### B. Fitur Utama
