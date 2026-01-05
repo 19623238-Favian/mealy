@@ -1,5 +1,8 @@
 
 # UAS II3160 - Mengembangkan Layanan Microservice (Tugas 3)
+<p align="center">
+  <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/037e90f0-c3fe-4f33-9c9f-2d184dfb051b" />
+</p>
 ## Mealy: Diet Meal Planner
 Microservice ini dikembangkan dalam rangka memenuhi UAS II3160 Teknologi Sistem Terintegrasi, lebih tepatnya Tugas 3 - Integrasi Layanan 
 Nama Pembuat Layanan Integrasi: Favian Rafi Laftiyanto / 18223036
@@ -36,7 +39,14 @@ Layanan ini dikembangkan dengan memanfaatkan 2 buah API yang telah dibuat pada T
 
 ### Screenshot Website
 #### Main Page
+<img width="1600" height="765" alt="image" src="https://github.com/user-attachments/assets/049359dd-4ac0-4c21-99ad-f57e77e28a3e" />
+<img width="1600" height="767" alt="image" src="https://github.com/user-attachments/assets/791c468c-8012-4a32-a687-c5a422e0d927" />
 
 #### Food Recommendations Example
+<img width="1600" height="770" alt="image" src="https://github.com/user-attachments/assets/fb16964d-1214-43da-90fd-37e093b4c532" />
+<img width="1600" height="766" alt="image" src="https://github.com/user-attachments/assets/fc9c46bc-80b0-41f7-ac0d-7ad4588b14c3" />
+
 
 #### Food Nutritions Search
+<img width="1600" height="759" alt="image" src="https://github.com/user-attachments/assets/54739359-d67c-46db-9ca4-5363f187061a" />
+<img width="1600" height="766" alt="image" src="https://github.com/user-attachments/assets/e67fcc5c-de6d-4ae6-bf01-ddf881797748" />
