@@ -75,6 +75,28 @@
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col min-h-screen">
+        <div id="auth-gateway" class="fixed inset-0 z-[999] bg-[#1B4332] flex items-center justify-center p-4">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-b-8 border-[#DF6D14]">
+                <div class="mb-6">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMnEMPTwivzr5Xs56QuyxBxi3BNExlK5RDn6U4gfoekXngwMc1Cse0dLVZZ6yrdvZh1wsh7FZiy3RsUD215H8-vvViHhL0zmzRruIW_sJMT3w3rCQQ=w2400" alt="Mealy Logo" class="w-24 h-24 mx-auto rounded-full mb-4 border-4 border-white shadow-md object-cover">
+                    
+                    <h2 class="text-2xl font-black text-gray-800 tracking-tight uppercase">Welcome to Mealy!</h2>
+                    <p class="text-gray-500 text-xs font-bold mt-1 uppercase tracking-tighter">Silahkan masukkan Access Key Mealy</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="text-left">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">System Access Key</label>
+                        <input type="password" id="gateway-input" placeholder="••••••••••••" 
+                            class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#3A7D44] text-center text-lg font-bold tracking-widest">
+                    </div>
+                    <button id="authBtn" onclick="verifyAccess()" class="w-full bg-[#3A7D44] text-white font-bold py-4 rounded-xl hover:bg-[#2D5A32] transform hover:-translate-y-1 transition-all shadow-lg uppercase tracking-wider">
+                        Unlock System <i class="fas fa-unlock ml-2"></i>
+                    </button>
+                </div>
+                <p id="auth-error" class="text-red-500 mt-4 text-xs font-bold hidden bg-red-50 p-2 rounded border border-red-100 italic"></p>
+            </div>
+        </div>
 
     <div class="max-w-6xl mx-auto flex-grow w-full">
         <header class="flex flex-col md:flex-row items-center justify-center mb-8 md:mb-12 gap-6">
@@ -257,6 +279,55 @@
         
         let foods_counter = 0;
         let currentSearchData = [];
+        let USER_TOKEN = ""; // Variabel global untuk menyimpan token dari API teman
+
+        // --- MODUL AUTENTIKASI ---
+        async function verifyAccess() {
+        const inputKey = document.getElementById('gateway-input').value;
+        const errorMsg = document.getElementById('auth-error');
+        const authBtn = document.getElementById('authBtn');
+        
+        // Base64 dari "Mealy-UAS-TST2025" adalah "TWVhbHktVUFTLVRTVDIwMjU="
+        const MASTER_KEY_ENCODED = "TWVhbHktVUFTLVRTVDIwMjU=";
+
+        // Kita encode input user ke Base64, lalu bandingkan
+        if (btoa(inputKey) !== MASTER_KEY_ENCODED) {
+            errorMsg.innerText = "ACCESS KEY SALAH!";
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        authBtn.disabled = true;
+        authBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Validating...`;
+
+        try {
+            const loginRes = await fetch(LOGIN_API, { method: 'POST' });
+            const loginData = await loginRes.json();
+            
+            if (loginData.token) {
+                USER_TOKEN = loginData.token;
+                sessionStorage.setItem('mealy_session_token', USER_TOKEN);
+                document.getElementById('auth-gateway').classList.add('hidden');
+            } else {
+                throw new Error("Gagal verifikasi layanan pusat.");
+            }
+        } catch (e) {
+            errorMsg.innerText = "API ERROR: " + e.message;
+            errorMsg.classList.remove('hidden');
+        } finally {
+            authBtn.disabled = false;
+            authBtn.innerHTML = `Unlock System <i class="fas fa-unlock ml-2"></i>`;
+        }
+    }
+
+        // Cek Sesi saat Refresh
+        window.onload = () => {
+            const savedToken = sessionStorage.getItem('mealy_session_token');
+            if (savedToken) {
+                USER_TOKEN = savedToken;
+                document.getElementById('auth-gateway').classList.add('hidden');
+            }
+        };
 
         function switchPage(page) {
             const planner = document.getElementById('page-planner');
@@ -335,6 +406,13 @@
 
         healthForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Cek apakah token tersedia (sudah login)
+            if (!USER_TOKEN) {
+                alert("Sesi tidak valid. Silakan refresh dan masukkan Access Key.");
+                return;
+            }
+
             const age = parseInt(document.getElementById('age').value);
             const weight = parseFloat(document.getElementById('weight').value);
             const height = parseFloat(document.getElementById('height').value);
@@ -362,16 +440,19 @@
             };
 
             try {
-                const loginRes = await fetch(LOGIN_API, { method: 'POST' });
-                const loginData = await loginRes.json();
-                const jwtToken = loginData.token;
-
+                // Gunakan USER_TOKEN yang sudah didapat saat Unlock Gateway
                 const nutritionRes = await fetch(NUTRITION_API, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${USER_TOKEN}` 
+                    },
                     body: JSON.stringify(formData)
                 });
                 const nutritionData = await nutritionRes.json();
+                
+                if (!nutritionRes.ok) throw new Error(nutritionData.message || "Gagal mengambil data nutrisi.");
+                
                 displaySummary(nutritionData);
 
                 const groceryRes = await fetch(GROCERY_API, {
@@ -385,7 +466,7 @@
                     renderResults(groceryData.data);
                 }
             } catch (error) {
-                alert("Koneksi Error: " + error.message);
+                alert("Kesalahan Sistem: " + error.message);
             } finally {
                 loading.classList.add('hidden');
                 resultArea.classList.remove('hidden');
